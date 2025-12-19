@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TECCA.LOVE | Stationery Shop</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Quicksand:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --pink-main: #F8B4FE;
+            --white-soft: #ffffff;
+            --yellow-soft: #FFF9C4;
+        }
+        body { font-family: 'Quicksand', sans-serif; background-color: var(--pink-main); margin: 0; overflow-x: hidden; }
+        .font-title { font-family: 'Fredoka One', cursive; }
+        
+        /* GERBANG LOGIN AWAL */
+        #login-gate {
+            position: fixed; inset: 0; z-index: 2000;
+            background-color: var(--pink-main); display: flex;
+            align-items: center; justify-content: center;
+        }
+        .login-box {
+            background: white; padding: 40px; border-radius: 40px;
+            text-align: center; width: 90%; max-width: 400px; box-shadow: 0 20px 50px rgba(0,0,0,0.1);
+        }
+        .login-input {
+            width: 100%; padding: 15px; margin-bottom: 15px;
+            border: 2px solid #FCE7F3; border-radius: 20px; outline: none; color: #333;
+        }
+
+        /* Navbar Sejajar (Logo - Menu - Akun) */
+        .nav-container { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 10px 5%; position: sticky; top: 0; width: 100%; z-index: 100; 
+            background: rgba(248, 180, 254, 0.85); 
+            backdrop-filter: blur(12px); 
+            box-shadow: 0 4px 25px rgba(0,0,0,0.1); 
+        }
+        .nav-menu-center { display: flex; gap: 10px; }
+        .nav-tab { 
+            background: rgba(255, 255, 255, 0.4); padding: 8px 20px; 
+            border-radius: 50px; color: white; transition: 0.3s; font-weight: 600;
+            position: relative;
+        }
+        .nav-tab.active-tab { background: white; color: var(--pink-main); font-weight: 800; transform: scale(1.05); }
+
+        .cart-badge {
+            position: absolute; top: -5px; right: -5px;
+            background: #ef4444; color: white; font-size: 10px;
+            width: 18px; height: 18px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            border: 2px solid var(--pink-main);
+        }
+
+        .account-info { display: flex; align-items: center; gap: 10px; color: white; }
+
+        .btn-custom { 
+            background: white; color: var(--pink-main); padding: 14px 35px; 
+            border-radius: 50px; font-weight: 800; transition: 0.3s; border: none; 
+            display: inline-block; cursor: pointer; text-transform: uppercase;
+        }
+        .btn-custom:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.1); }
+
+        .tab-content { display: none; min-height: 100vh; }
+        .active-page { display: block; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .price-btn { 
+            background: #FFF5FF; color: #D53F8C; padding: 10px; 
+            border-radius: 18px; font-weight: 800; width: 100%; 
+            transition: 0.2s; border: 2px solid transparent;
+        }
+        .price-btn:hover { border-color: #D53F8C; transform: scale(1.02); }
+
+        .cart-item {
+            background: white; border-radius: 25px; padding: 15px;
+            margin-bottom: 15px; display: flex; align-items: center; gap: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05); color: #333;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="login-gate">
+        <div class="login-box">
+            <img src="assets/logo.png" class="h-20 mx-auto mb-4">
+            <h2 class="font-title text-2xl text-pink-500 mb-2">WELCOME!</h2>
+            <p class="text-gray-400 mb-6 text-sm">Enter your name to start shopping ✨</p>
+            <input type="text" id="reg-name" placeholder="Name" class="login-input">
+            <input type="email" id="reg-email" placeholder="Email" class="login-input">
+            <button onclick="startApp()" class="btn-custom bg-pink-400 !text-white w-full">Enter Now!</button>
+        </div>
+    </div>
+
+    <div id="toast-success" class="hidden fixed top-20 left-1/2 -translate-x-1/2 z-[3000] bg-white text-pink-500 px-8 py-3 rounded-full font-bold shadow-lg">
+        LOGIN SUCCESS! ✨
+    </div>
+
+    <div class="nav-container">
+        <div class="nav-logo">
+            <img src="assets/logo.png" class="h-10">
+        </div>
+
+        <div class="nav-menu-center">
+            <button onclick="showPage('home', this)" class="nav-tab active-tab">HOME</button>
+            <button onclick="showPage('catalogue', this)" class="nav-tab">CATALOGUE</button>
+            <button onclick="showPage('deals', this)" class="nav-tab">SPECIAL DEALS</button>
+            <button onclick="showPage('orders', this)" class="nav-tab">
+                ORDERS
+                <span id="cart-count" class="cart-badge hidden">0</span>
+            </button>
+        </div>
+
+        <div class="account-info">
+            <span id="user-name-label" class="font-bold text-sm hidden md:block"></span>
+            <button onclick="logoutApp()" class="text-xs underline font-bold bg-white/20 px-3 py-1 rounded-full">Keluar</button>
+        </div>
+    </div>
+
+    <section id="home" class="tab-content active-page">
+        <div class="h-[85vh] flex flex-col items-center justify-center text-center px-4">
+            <h2 class="text-white text-2xl md:text-3xl mb-2">Welcome To</h2>
+            <h1 class="font-title text-7xl md:text-[130px] text-white drop-shadow-2xl mb-10 leading-none">TECCA.LOVE</h1>
+            <button onclick="document.getElementById('home-promo').scrollIntoView({behavior:'smooth'})" class="btn-custom">Explore</button>
+        </div>
+
+        <div id="home-promo" class="py-24 px-6 text-center">
+            <h2 class="font-title text-white text-4xl md:text-5xl mb-16 uppercase italic">Today's Biggest Discounts!</h2>
+            <div class="flex flex-row flex-wrap justify-center items-end gap-10 mb-16">
+                <div class="flex flex-col items-center">
+                    <div class="relative mb-4">
+                        <div class="absolute -top-3 -left-3 bg-red-600 text-white font-bold px-4 py-1 rounded shadow-lg z-10">100K</div>
+                        <img src="assets/complete starter pack.jpg" class="w-44 h-44 md:w-52 md:h-52 rounded-[40px] border-4 border-white shadow-2xl">
+                    </div>
+                    <p class="font-bold text-white text-xl">Complete Starter Pack</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="relative mb-4">
+                        <div class="absolute -top-3 -left-3 bg-red-600 text-white font-bold px-4 py-1 rounded shadow-lg z-10">35K</div>
+                        <img src="assets/writers blockbuster.jpg" class="w-44 h-44 md:w-52 md:h-52 rounded-[40px] border-4 border-white shadow-2xl">
+                    </div>
+                    <p class="font-bold text-white text-xl">Writers Blockbuster</p>
+                </div>
+                <div class="flex flex-col items-center">
+                    <div class="relative mb-4">
+                        <div class="absolute -top-3 -left-3 bg-red-600 text-white font-bold px-4 py-1 rounded shadow-lg z-10">75K</div>
+                        <img src="assets/carry essentials duo.jpg" class="w-44 h-44 md:w-52 md:h-52 rounded-[40px] border-4 border-white shadow-2xl">
+                    </div>
+                    <p class="font-bold text-white text-xl">Carry Essentials Duo</p>
+                </div>
+            </div>
+            <button onclick="showPage('deals')" class="btn-custom">View All Special Offers</button>
+        </div>
+
+        <div class="py-24 px-10 bg-white/5 text-center">
+            <div class="max-w-6xl mx-auto flex flex-col md:flex-row items-center gap-16">
+                <img src="assets/branding.jpg" class="mx-auto w-full md:w-1/2 max-w-[450px] aspect-square object-cover rounded-[50px] shadow-2xl">
+                <div class="w-full md:w-1/2 text-left">
+                    <h2 class="font-title text-white text-5xl md:text-7xl leading-tight mb-10 uppercase">ALL YOUR STATIONERY NEEDS, IN ONE PLACE.</h2>
+                    <button onclick="showPage('catalogue')" class="btn-custom">Start Shopping Now</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="py-24 px-6">
+            <h2 class="font-title text-center text-white text-4xl mb-16 uppercase italic">Testimonial</h2>
+            <div class="flex flex-wrap justify-center gap-8 max-w-6xl mx-auto">
+                <div class="bg-[#FFF9C4] p-8 rounded-[35px] w-full md:w-[30%] shadow-lg">
+                    <div class="flex text-yellow-500 mb-4 text-xl">⭐⭐⭐⭐⭐</div>
+                    <p class="text-gray-700 italic font-medium leading-relaxed">"Buku catatannya premium banget, tinta pena gel saya gak tembus sama sekali! Highly recommended!"</p>
+                </div>
+                <div class="bg-[#FFF9C4] p-8 rounded-[35px] w-full md:w-[30%] shadow-lg">
+                    <div class="flex text-yellow-500 mb-4 text-xl">⭐⭐⭐⭐⭐</div>
+                    <p class="text-gray-700 italic font-medium leading-relaxed">"Adminnya responsif dan ramah banget. Cocok buat yang butuh ATK mendadak!"</p>
+                </div>
+                <div class="bg-[#FFF9C4] p-8 rounded-[35px] w-full md:w-[30%] shadow-lg">
+                    <div class="flex text-yellow-500 mb-4 text-xl">⭐⭐⭐⭐⭐</div>
+                    <p class="text-gray-700 italic font-medium leading-relaxed">"Paket Complete Starter ini beneran hemat banget. Good deal!"</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section id="catalogue" class="tab-content pt-16 px-6 pb-24 text-center">
+        <h1 class="font-title text-6xl text-white mb-20 italic">All Products!</h1>
+        <div class="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-7xl mx-auto" id="catalogue-grid"></div>
+    </section>
+
+    <section id="deals" class="tab-content pt-16 px-6 pb-24 text-center">
+        <h1 class="font-title text-red-800 text-7xl md:text-9xl mb-4 italic">Special Deals</h1>
+        <h2 class="font-title text-red-900 text-3xl md:text-5xl mb-10">Discount until 30% OFF</h2>
+        
+        <p class="font-bold text-white text-xl animate-pulse mb-4">LIMITED ONLY ONE DAY</p>
+        <div class="font-mono text-8xl md:text-[140px] font-bold text-white tracking-tighter drop-shadow-xl mb-20" id="timer-display">23:59:59</div>
+        
+        <div class="flex flex-wrap justify-center gap-10">
+            <div class="bg-white/10 p-8 rounded-[40px] w-full md:w-80 backdrop-blur-md">
+                <img src="assets/complete starter pack.jpg" class="rounded-3xl mb-6 w-full aspect-square object-cover shadow-sm">
+                <h3 class="font-bold text-2xl text-pink-700 mb-4 uppercase">Starter Pack</h3>
+                <button onclick="addToCart('b1')" class="bg-red-800 text-white w-full py-4 rounded-2xl font-bold text-xl shadow-lg">ADD TO CART</button>
+            </div>
+            <div class="bg-white/10 p-8 rounded-[40px] w-full md:w-80 backdrop-blur-md">
+                <img src="assets/writers blockbuster.jpg" class="rounded-3xl mb-6 w-full aspect-square object-cover shadow-sm">
+                <h3 class="font-bold text-2xl text-pink-700 mb-4 uppercase">Writer Pack</h3>
+                <button onclick="addToCart('b2')" class="bg-red-800 text-white w-full py-4 rounded-2xl font-bold text-xl shadow-lg">ADD TO CART</button>
+            </div>
+            <div class="bg-white/10 p-8 rounded-[40px] w-full md:w-80 backdrop-blur-md">
+                <img src="assets/carry essentials duo.jpg" class="rounded-3xl mb-6 w-full aspect-square object-cover shadow-sm">
+                <h3 class="font-bold text-2xl text-pink-700 mb-4 uppercase">Duo Pack</h3>
+                <button onclick="addToCart('b3')" class="bg-red-800 text-white w-full py-4 rounded-2xl font-bold text-xl shadow-lg">ADD TO CART</button>
+            </div>
+        </div>
+    </section>
+
+    <section id="orders" class="tab-content pt-16 px-6">
+        <div id="order-main" class="max-w-4xl mx-auto">
+            <h1 class="font-title text-white text-5xl mb-10 text-center italic">Your Cart</h1>
+            <div id="cart-list"></div>
+            <div id="cart-summary" class="hidden mt-10 bg-white rounded-[40px] p-10 shadow-2xl">
+                <div class="flex justify-between items-center mb-8">
+                    <span class="text-2xl font-bold text-gray-800">TOTAL PEMBAYARAN:</span>
+                    <span id="total-price" class="text-4xl font-title text-pink-500">IDR 0</span>
+                </div>
+                <button onclick="processPay()" class="bg-gradient-to-r from-yellow-300 to-pink-400 w-full py-6 rounded-2xl font-bold text-3xl shadow-xl uppercase text-white">PAY NOW</button>
+            </div>
+        </div>
+
+        <div id="success-screen" class="hidden max-w-4xl mx-auto text-center py-32 bg-white rounded-[60px] shadow-2xl">
+            <div class="text-[120px] mb-8 animate-bounce">🎁</div>
+            <h1 class="font-title text-6xl text-pink-500 mb-6 uppercase">SUCCESS, <span id="buyer-name"></span>!</h1>
+            <h2 class="text-3xl font-bold text-gray-700">Barang kamu sedang dikemas...</h2>
+            <button onclick="location.reload()" class="mt-12 text-pink-400 font-bold underline text-xl">Pesan Lagi</button>
+        </div>
+    </section>
+
+    <script>
+        const products = [
+            { id: 1, name: 'Tyna Backpack', price: 80000, img: 'assets/tyna backpack.jpg' },
+            { id: 2, name: 'Loza Backpack', price: 85000, img: 'assets/loza backpack.jpg' },
+            { id: 3, name: 'Piwwy Backpack', price: 80000, img: 'assets/piwwy backpack.jpg' },
+            { id: 4, name: 'Pocket Pall', price: 30000, img: 'assets/pocket pall.jpg' },
+            { id: 5, name: 'Pink Dust', price: 25000, img: 'assets/pink dust.jpg' },
+            { id: 6, name: 'Cloud Cuddle', price: 25000, img: 'assets/cloud cuddle.jpg' },
+            { id: 7, name: 'Cakey', price: 20000, img: 'assets/cakey.jpg' },
+            { id: 8, name: 'Doll Curator', price: 20000, img: 'assets/doll curator.jpg' },
+            { id: 9, name: 'Fruity Vault', price: 20000, img: 'assets/fruity vault.jpg' },
+            { id: 10, name: 'Gravity Flow', price: 5000, img: 'assets/gravity flow.jpg' },
+            { id: 11, name: 'Infinite Chew', price: 15000, img: 'assets/infinite chew.jpg' },
+            { id: 12, name: 'Whisper Mark', price: 4000, img: 'assets/whisper mark.jpg' },
+            { id: 'b1', name: 'Starter Pack', price: 100000, img: 'assets/complete starter pack.jpg' },
+            { id: 'b2', name: 'Writer Pack', price: 35000, img: 'assets/writers blockbuster.jpg' },
+            { id: 'b3', name: 'Duo Pack', price: 75000, img: 'assets/carry essentials duo.jpg' }
+        ];
+
+        let cart = [];
+        let currentUserName = "";
+
+        // LOGIN SYSTEM
+        function startApp() {
+            const name = document.getElementById('reg-name').value;
+            const email = document.getElementById('reg-email').value;
+
+            if (name.trim() !== "" && email.trim() !== "") {
+                currentUserName = name;
+                document.getElementById('user-name-label').innerText = "Hi, " + name;
+                document.getElementById('toast-success').classList.remove('hidden');
+                
+                setTimeout(() => {
+                    document.getElementById('toast-success').classList.add('hidden');
+                    document.getElementById('login-gate').style.display = 'none';
+                    showPage('home');
+                }, 1500);
+            } else {
+                alert("Isi nama dan email dulu ya!");
+            }
+        }
+
+        function logoutApp() {
+            if (confirm("Ingin keluar?")) {
+                currentUserName = "";
+                cart = [];
+                updateCartUI();
+                document.getElementById('login-gate').style.display = 'flex';
+                document.getElementById('reg-name').value = "";
+                document.getElementById('reg-email').value = "";
+            }
+        }
+
+        // NAVIGATION
+        function showPage(pageId, btn) {
+            document.querySelectorAll('.tab-content').forEach(s => s.classList.remove('active-page'));
+            document.getElementById(pageId).classList.add('active-page');
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active-tab'));
+            if(btn) btn.classList.add('active-tab');
+            if(pageId === 'orders') renderCart();
+            window.scrollTo(0,0);
+        }
+
+        // RENDER CATALOGUE
+        const grid = document.getElementById('catalogue-grid');
+        products.slice(0, 12).forEach(p => {
+            grid.innerHTML += `
+                <div class="bg-white/10 p-5 rounded-[40px] shadow-lg flex flex-col items-center backdrop-blur-sm">
+                    <img src="${p.img}" class="rounded-[30px] mb-5 w-full aspect-square object-cover">
+                    <h4 class="font-bold text-white text-xl mb-6">${p.name}</h4>
+                    <button onclick="addToCart('${p.id}')" class="price-btn">ADD TO CART (IDR ${p.price.toLocaleString()})</button>
+                </div>
+            `;
+        });
+
+        // CART LOGIC
+        function addToCart(id) {
+            const product = products.find(p => p.id == id);
+            const existing = cart.find(item => item.id == id);
+            if (existing) { existing.qty += 1; } else { cart.push({ ...product, qty: 1 }); }
+            updateCartUI();
+            alert(product.name + " masuk keranjang! ✨");
+        }
+
+        function updateCartUI() {
+            const count = cart.reduce((total, item) => total + item.qty, 0);
+            const badge = document.getElementById('cart-count');
+            badge.innerText = count;
+            badge.classList.toggle('hidden', count === 0);
+        }
+
+        function renderCart() {
+            const list = document.getElementById('cart-list');
+            const summary = document.getElementById('cart-summary');
+            if (cart.length === 0) {
+                list.innerHTML = `<div class="bg-white/20 p-10 rounded-[40px] text-center text-white"><p class="text-xl">Keranjang kosong...</p></div>`;
+                summary.classList.add('hidden');
+                return;
+            }
+            summary.classList.remove('hidden');
+            list.innerHTML = "";
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price * item.qty;
+                list.innerHTML += `
+                    <div class="cart-item">
+                        <img src="${item.img}" class="w-16 h-16 rounded-xl object-cover">
+                        <div class="flex-grow">
+                            <h4 class="font-bold text-lg">${item.name}</h4>
+                            <p class="text-pink-500 font-bold">IDR ${(item.price * item.qty).toLocaleString()}</p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button onclick="changeQty(${index}, -1)" class="w-8 h-8 bg-gray-100 rounded-full font-bold">-</button>
+                            <span class="font-bold">${item.qty}</span>
+                            <button onclick="changeQty(${index}, 1)" class="w-8 h-8 bg-gray-100 rounded-full font-bold">+</button>
+                            <button onclick="removeItem(${index})" class="ml-4 text-red-500 font-bold">X</button>
+                        </div>
+                    </div>`;
+            });
+            document.getElementById('total-price').innerText = "IDR " + total.toLocaleString();
+        }
+
+        function changeQty(index, val) {
+            if (cart[index].qty + val >= 1) {
+                cart[index].qty += val;
+                renderCart();
+                updateCartUI();
+            }
+        }
+
+        function removeItem(index) {
+            cart.splice(index, 1);
+            renderCart();
+            updateCartUI();
+        }
+
+        function processPay() {
+            document.getElementById('order-main').classList.add('hidden');
+            document.getElementById('buyer-name').innerText = currentUserName.toUpperCase();
+            document.getElementById('success-screen').classList.remove('hidden');
+            cart = [];
+            updateCartUI();
+        }
+
+        // TIMER
+        function startTimer() {
+            let s = 24 * 3600 - 1;
+            setInterval(() => {
+                let h = Math.floor(s/3600).toString().padStart(2,'0');
+                let m = Math.floor((s%3600)/60).toString().padStart(2,'0');
+                let sc = (s%60).toString().padStart(2,'0');
+                document.getElementById('timer-display').innerText = `${h}:${m}:${sc}`;
+                s--;
+            }, 1000);
+        }
+        startTimer();
+    </script>
+</body>
+</html>
